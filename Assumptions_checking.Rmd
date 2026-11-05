@@ -1,0 +1,112 @@
+---
+title: "Crop data"
+author: "Rgahuraam P (2648130)"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## 1.INTRODUCTION
+A statistical technique for analysing the linear connection between an independent and dependent variable is called simple linear regression. This study uses simple linear regression to evaluate the association between agricultural yield and fertiliser use. Crop yield (kg) is the dependent variable, and fertiliser use (kg) is the independent variable. By verifying the assumptions of normality, constant variance, and error independence, residual analysis is used to further assess the suitability of the fitted regression model.
+
+## 2. Objectives
+1. To use correlation and scatter plots to investigate the connection between crop yield and fertiliser use.
+2. To understand the estimated regression coefficients after using a Simple Linear Regression model.
+3. To use R-squared to evaluate the regression model's quality of fit.
+4. To confirm the residuals' normality using the P-P, Q-Q, and Shapiro-Wilk tests.
+5. To use the Breusch-Pagan test and the residuals vs fitted values plot to investigate the constant variance assumption.
+6. To use the Durbin-Watson test and ACF plot to look for serial correlation among residuals.
+
+## 3. Data Description
+Three variables pertaining to agricultural yield and fertiliser use make up the 130 observations in the dataset. R programming is used to carry out the analysis.
+Variable Data Type Measurement Scale Description No. Numerical Identifier Serial number of observations
+Fertiliser Used (kg) Numerical Ratio Fertiliser usage is represented by the independent variable (X).
+Crop Yield (kg) Crop yield dependent variable (Y) Numerical Ratio
+
+Crop output and fertiliser use are quantitative continuous variables. The regression model does not use the serial number; it is just used for identification.
+
+## ANALYSIS
+```{r}
+library(readxl)
+crop_data <- read_excel("C:/Users/raghu/OneDrive/Desktop/STUDIES/Guithub + Practical college/practicals/R programming/lab_5/crop data.xlsx")
+data <- crop_data
+head(data)
+```
+```{r}
+## dimension of data
+dim(data)
+```
+```{r}
+# structure od data
+str(data)
+```
+```{r}
+## correlation
+x<-data$'Fertilizer Used (kg)' #independent
+y<-data$'Crop Yield (kg)' #dependent
+cor(x,y)
+```
+# the coreelation indicates there is an strong positive linear relation.
+```{r}
+# Scatter plot
+plot(x,y, main="Fertilizer used vs Crop Yeild", xlab="Fertilizer used", ylab="Crop Yeild", pch=19)
+model=lm(y~x, data=data) #fitting the model
+abline(model, lwd=2, colour = "red") #regression line
+
+summary(model)
+```
+## Checking the normality of the data.
+```{r}
+
+# Shapiro wilk test 
+library(lmtest)
+res <- residuals(model)
+shapiro.test(res)
+## qq plot
+qqnorm(res)
+qqline(res)
+```
+## interpretation 
+ H0:The errors are normally distributed.
+ H1: The errors are not normally distributed.
+Since the p-value is less then 0.05 we reject the null hypothesis, therefore the data is not normally distributed, and is also verified by doing the qq plot.
+
+## cheking whether the varinace are constant or not.
+```{r}
+## BP test
+res <- model$residuals
+plot(fitted.values(model), res)
+abline(h=0,col='blue',lwd=2)
+library(lmtest)
+bptest(model)
+
+```
+## Interpretation
+ H0:The errors are following constant varinace.
+ H1: The errors are not following constant varinace.
+Since the p-value is greater than 0.05 we fail to reject the null hypothesis which mean the variance are always constant.
+The errors are following constant varinace.
+
+## checking whther there is an serial correlation among the errors.
+```{r}
+dwtest(model)
+acf(res)
+```
+## interpretation
+ H0: There is no autocorrelation among the residuals.
+ H1: There is positive autocorrelation among the residuals.
+
+ Since the p-value > 0.05, we fail to reject H0. Therefore, there is insufficient evidence of positive autocorrelation among the residuals. The DW statistic is slightly above 2, suggesting possible negative autocorrelation.
+
+ The ACF plot shows several spikes extending beyond the blue dashed confidence limits at multiple lags. The spikes also show a repeating pattern, indicating possible serial dependence among the residuals. Therefore, the ACF plot suggests that the residuals may not be independent.
+ 
+## CONCLUSION
+The Simple Linear Regression analysis revealed a very strong positive relationship between fertilizer usage and crop yield, with a correlation coefficient of 0.9997. The fitted regression model explains approximately 99.94% of the variation in crop yield, indicating an excellent statistical fit. The regression coefficient suggests that a 1 kg increase in fertilizer usage is associated with an estimated increase of 10.08 kg in crop yield.
+
+However, residual analysis revealed certain limitations. The Shapiro-Wilk test indicated that the residuals are not normally distributed (p-value < 0.05). The Breusch-Pagan test did not detect significant heteroscedasticity (p-value = 0.08228), although the residual plot showed a systematic pattern. Furthermore, the Durbin-Watson test did not indicate significant positive first-order autocorrelation, while the ACF plot suggested possible serial dependence at higher lags.
+
+Therefore, although the regression model demonstrates a very strong linear relationship and high explanatory power, some assumptions are not fully satisfied. Further examination of the model is recommended to improve its adequacy and reliability for statistical inference.
+
+
